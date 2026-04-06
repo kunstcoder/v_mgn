@@ -133,6 +133,16 @@ def _render_mesh(graph_xy: np.ndarray, edge_index: np.ndarray, node_values: np.n
     st.pyplot(fig, use_container_width=True)
 
 
+def _go_next_step(max_step: int) -> None:
+    """다음 step으로 이동 (버튼 콜백용)."""
+    st.session_state["selected_step"] = min(st.session_state["selected_step"] + 1, max_step)
+
+
+def _reset_step() -> None:
+    """step을 0으로 초기화 (버튼 콜백용)."""
+    st.session_state["selected_step"] = 0
+
+
 _init_state()
 
 with st.sidebar:
@@ -181,13 +191,14 @@ col_step_a, col_step_b, col_step_c = st.columns([2.1, 1.2, 1.2])
 with col_step_a:
     st.slider("학습 step", min_value=0, max_value=int(steps[-1]), key="selected_step")
 with col_step_b:
-    if st.button("다음 step ▶", use_container_width=True):
-        st.session_state["selected_step"] = min(st.session_state["selected_step"] + 1, int(steps[-1]))
-        st.rerun()
+    st.button(
+        "다음 step ▶",
+        use_container_width=True,
+        on_click=_go_next_step,
+        args=(int(steps[-1]),),
+    )
 with col_step_c:
-    if st.button("step 0으로", use_container_width=True):
-        st.session_state["selected_step"] = 0
-        st.rerun()
+    st.button("step 0으로", use_container_width=True, on_click=_reset_step)
 
 selected_step = int(st.session_state["selected_step"])
 
