@@ -18,12 +18,19 @@ ROOT = Path(__file__).resolve().parent
 
 
 class DemoRequestHandler(SimpleHTTPRequestHandler):
-    def do_GET(self) -> None:  # noqa: N802 (표준 라이브러리 시그니처 준수)
+    def _normalize_demo_path(self) -> None:
         if self.path in {"/", "/index.html"}:
             self.path = "/index.html"
         elif self.path in {"/mgn-easy", "/mgn-easy/"}:
             self.path = "/mgn_easy.html"
+
+    def do_GET(self) -> None:  # noqa: N802 (표준 라이브러리 시그니처 준수)
+        self._normalize_demo_path()
         super().do_GET()
+
+    def do_HEAD(self) -> None:  # noqa: N802 (표준 라이브러리 시그니처 준수)
+        self._normalize_demo_path()
+        super().do_HEAD()
 
 
 def run() -> None:
