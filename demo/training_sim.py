@@ -30,6 +30,8 @@ def _init_session_state() -> None:
         st.session_state["sim_config"] = None
     if "sim_data" not in st.session_state:
         st.session_state["sim_data"] = None
+    if "selected_step" not in st.session_state:
+        st.session_state["selected_step"] = 0
 
 
 def _validate_config(config: dict[str, float | int]) -> tuple[list[str], list[str]]:
@@ -208,9 +210,38 @@ loss_df = pd.DataFrame(
 )
 
 selected_step = st.slider(
-    "step 이동", min_value=0, max_value=current_config["total_steps"], value=0, step=1
+    "step 이동",
+    min_value=0,
+    max_value=current_config["total_steps"],
+    value=int(st.session_state["selected_step"]),
+    step=1,
+    key="selected_step",
 )
 show_target_overlay = st.checkbox("정답 데이터 표시", value=True)
+enable_visualization = st.toggle("시각화 켜기", value=True)
+
+loop_col1, loop_col2, loop_col3 = st.columns([1.2, 1.2, 3.0])
+with loop_col1:
+    if st.button("다음 step ▶", use_container_width=True):
+        st.session_state["selected_step"] = min(
+            st.session_state["selected_step"] + 1, current_config["total_steps"]
+        )
+        st.rerun()
+with loop_col2:
+    if st.button("step 초기화", use_container_width=True):
+        st.session_state["selected_step"] = 0
+        st.rerun()
+with loop_col3:
+    jump_step = st.slider(
+        "루프 점프(step)", min_value=1, max_value=min(30, current_config["total_steps"]), value=5, step=1
+    )
+    if st.button("점프 적용", use_container_width=True):
+        st.session_state["selected_step"] = min(
+            st.session_state["selected_step"] + jump_step, current_config["total_steps"]
+        )
+        st.rerun()
+
+selected_step = int(st.session_state["selected_step"])
 
 current_pred = preds_by_step[selected_step]
 node_df = pd.DataFrame(
@@ -221,6 +252,12 @@ node_df = pd.DataFrame(
         "error": current_pred - target,
     }
 )
+
+if not enable_visualization:
+    st.warning("시각화가 꺼져 있습니다. 토글을 켜면 step 변화 그래프를 다시 볼 수 있습니다.")
+    st.dataframe(node_df, use_container_width=True, height=300)
+    st.line_chart(loss_df, x="step", y=["loss (MSE)", "MAE"])
+    st.stop()
 
 col1, col2 = st.columns([2.5, 1.3])
 
@@ -264,6 +301,15 @@ with col1:
 
     st.subheader("손실 곡선 (loss vs step)")
     st.line_chart(loss_df, x="step", y="loss (MSE)")
+
+    st.subheader("학습 루프 변화 추적")
+    track_count = st.slider("추적할 노드 수", min_value=1, max_value=6, value=3, step=1)
+    tracked_nodes = node_ids[:track_count]
+    trajectory_df = pd.DataFrame({"step": steps})
+    for node_id in tracked_nodes:
+        trajectory_df[f"node_{node_id}"] = preds_by_step[:, node_id]
+    st.line_chart(trajectory_df, x="step", y=[f"node_{node_id}" for node_id in tracked_nodes])
+    st.caption("선택한 노드들의 예측값이 step 진행에 따라 어떻게 수렴하는지 보여줍니다.")
 
 with col2:
     st.subheader(f"step {selected_step} 요약 메트릭")
