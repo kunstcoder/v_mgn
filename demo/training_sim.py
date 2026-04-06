@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 import streamlit as st
+from matplotlib import colors
+import matplotlib.pyplot as plt
 
 
 st.set_page_config(page_title="Training Progress Simulator", layout="wide")
@@ -46,6 +48,7 @@ loss_df = pd.DataFrame(
 )
 
 selected_step = st.slider("step 이동", min_value=0, max_value=total_steps, value=0, step=1)
+show_target_overlay = st.checkbox("정답 데이터 표시", value=True)
 
 current_pred = preds_by_step[selected_step]
 node_df = pd.DataFrame(
@@ -61,11 +64,40 @@ col1, col2 = st.columns([2.5, 1.3])
 
 with col1:
     st.subheader("현재 step의 노드 상태")
-    st.line_chart(
-        node_df,
-        x="node",
-        y=["target", "prediction"],
+    fig, ax = plt.subplots(figsize=(10, 4.5))
+    ax.plot(
+        node_df["node"],
+        node_df["prediction"],
+        color="#2563eb",
+        marker="o",
+        markersize=4,
+        linewidth=1.7,
+        label="prediction",
     )
+
+    if show_target_overlay:
+        ax.plot(
+            node_df["node"],
+            node_df["target"],
+            color="#f97316",
+            marker="x",
+            markersize=5,
+            linewidth=1.4,
+            linestyle="--",
+            label="target",
+        )
+
+    y_min = min(np.min(preds_by_step), np.min(target))
+    y_max = max(np.max(preds_by_step), np.max(target))
+    y_pad = 0.1 * (y_max - y_min + 1e-9)
+    ax.set_ylim(y_min - y_pad, y_max + y_pad)
+    ax.set_xlabel("node")
+    ax.set_ylabel("value")
+    ax.set_title(f"Node-wise prediction (step={selected_step})")
+    ax.grid(alpha=0.25)
+    ax.legend(loc="upper right")
+    st.pyplot(fig, use_container_width=True)
+
     st.caption("슬라이더를 움직이면 해당 시점의 prediction이 즉시 갱신됩니다.")
 
     st.subheader("손실 곡선 (loss vs step)")
@@ -93,4 +125,21 @@ with col2:
     )
 
     st.write("### 현재 step 오류 분포")
-    st.bar_chart(node_df, x="node", y="error")
+    err_abs_max = float(np.max(np.abs(errors)))
+    err_norm = colors.TwoSlopeNorm(vmin=-err_abs_max, vcenter=0.0, vmax=err_abs_max)
+    err_cmap = plt.get_cmap("RdBu_r")
+    bar_colors = err_cmap(err_norm(node_df["error"].to_numpy()))
+
+    fig_err, ax_err = plt.subplots(figsize=(6, 3.8))
+    ax_err.bar(node_df["node"], node_df["error"], color=bar_colors, width=0.8)
+    ax_err.axhline(0.0, color="#111827", linewidth=1.0)
+    ax_err.set_xlabel("node")
+    ax_err.set_ylabel("prediction - target")
+    ax_err.set_title("Error by node")
+    ax_err.set_ylim(-err_abs_max * 1.1, err_abs_max * 1.1)
+    ax_err.grid(axis="y", alpha=0.25)
+
+    sm = plt.cm.ScalarMappable(norm=err_norm, cmap=err_cmap)
+    sm.set_array([])
+    fig_err.colorbar(sm, ax=ax_err, pad=0.02, label="error scale (fixed)")
+    st.pyplot(fig_err, use_container_width=True)
