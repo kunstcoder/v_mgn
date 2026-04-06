@@ -24,3 +24,15 @@ streamlit run demo/streamlit_app.py
 2. 메시 셀 연결(삼각형/사각형)과 그래프 엣지 연결 동시 보관
 3. 노드/엣지/글로벌 상태를 데이터클래스로 정의
 4. `st.dataframe` 기반 초기 상태 테이블과 노드+엣지 2D 플롯을 한 화면에서 렌더링
+
+## 통합 뷰어 실행 (app + sim)
+
+아래 명령 하나로 **mesh 이미지 + 노드/엣지 값 + 학습 루프(step)** 를 동시에 확인할 수 있습니다.
+
+```bash
+streamlit run app.py
+```
+
+- `학습 step` 슬라이더/버튼으로 루프 진행
+- 노드 색상: `pred_pressure`, 엣지 색상: `|Δpressure|`
+- 우측/하단 테이블에서 현재 step의 노드/엣지 수치 즉시 확인
