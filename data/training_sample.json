@@ -1,0 +1,11 @@
+{
+  "run_id": "train-run-001",
+  "epoch": 12,
+  "learning_rate": 0.0005,
+  "metrics": {
+    "loss": 0.034,
+    "val_loss": 0.041,
+    "mae": 0.012
+  },
+  "status": "running"
+}
