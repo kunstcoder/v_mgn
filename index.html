@@ -13,6 +13,26 @@
         <p>입력 데이터, 학습 과정, 출력 데이터를 단계별로 확인할 수 있는 정적 데모입니다.</p>
       </header>
 
+      <section class="panel flow-panel" aria-label="MeshGraphNet pipeline flow">
+        <h2>개념 흐름 한눈에 보기</h2>
+        <div class="flow-diagram">
+          <div class="flow-step">
+            <p class="flow-title">📨 Message Passing</p>
+            <p class="flow-caption">노드·엣지 텐서가 이웃 정보 교환으로 업데이트됩니다.</p>
+          </div>
+          <span class="flow-arrow" aria-hidden="true">→</span>
+          <div class="flow-step">
+            <p class="flow-title">⚙️ Processor Steps</p>
+            <p class="flow-caption">노드·엣지·글로벌 텐서가 반복적으로 정제됩니다.</p>
+          </div>
+          <span class="flow-arrow" aria-hidden="true">→</span>
+          <div class="flow-step">
+            <p class="flow-title">📤 Decoder</p>
+            <p class="flow-caption">업데이트된 텐서에서 최종 물리량 예측이 생성됩니다.</p>
+          </div>
+        </div>
+      </section>
+
       <section class="panel" id="input-panel">
         <h2>Input Data</h2>
         <p class="section-desc">MeshGraphNet 입력 데이터 예시를 로드해 노드/엣지/피처 구성을 확인합니다.</p>
@@ -31,8 +51,22 @@
         <h2>Output Data</h2>
         <p class="section-desc">모델 출력 결과 예시를 로드해 예측 값/시각화용 데이터를 확인합니다.</p>
         <button class="load-btn" data-target="output">Load Output Sample</button>
+        <section class="split-view" aria-label="current and target prediction split view">
+          <article class="split-card">
+            <h3>현재 예측 상태 (Current)</h3>
+            <pre class="content split-content" id="current-content">출력 샘플을 로드하면 현재 예측이 표시됩니다.</pre>
+          </article>
+          <article class="split-card">
+            <h3>목표 상태 (Target)</h3>
+            <pre class="content split-content" id="target-content">출력 샘플을 로드하면 목표 상태와 차이를 확인할 수 있습니다.</pre>
+          </article>
+        </section>
         <pre class="content" id="output-content">샘플을 불러오면 내용이 표시됩니다.</pre>
       </section>
+
+      <footer class="demo-limit">
+        ⚠️ 데모 한계: 본 앱의 수치/학습 로그는 합성 데이터 기반 시연용이며, 실제 모델 학습/검증 결과가 아닙니다.
+      </footer>
     </main>
 
     <script src="app.js"></script>
