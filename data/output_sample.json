@@ -1,0 +1,10 @@
+{
+  "prediction_id": "pred-001",
+  "timestamp": "2026-04-06T00:00:00Z",
+  "outputs": [
+    { "node_id": 0, "pressure": 1.02, "velocity": [0.21, 0.12] },
+    { "node_id": 1, "pressure": 0.97, "velocity": [0.11, 0.03] },
+    { "node_id": 2, "pressure": 1.08, "velocity": [0.03, 0.14] }
+  ],
+  "note": "샘플 출력 데이터"
+}
