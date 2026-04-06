@@ -3,10 +3,18 @@
 from __future__ import annotations
 
 from dataclasses import asdict
+from pathlib import Path
+import sys
 
 import matplotlib.pyplot as plt
 import pandas as pd
 import streamlit as st
+
+# `streamlit run demo/streamlit_app.py` 실행 시 작업 디렉터리에 따라
+# `demo` 패키지 해석이 실패할 수 있어 루트 경로를 명시적으로 보강한다.
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 from demo.data_gen import generate_demo_graph
 
